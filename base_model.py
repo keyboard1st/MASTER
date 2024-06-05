@@ -7,13 +7,14 @@ from torch.utils.data import Sampler
 import torch
 import torch.optim as optim
 
+# 计算ic和ric
 def calc_ic(pred, label):
     df = pd.DataFrame({'pred':pred, 'label':label})
     ic = df['pred'].corr(df['label'])
     ric = df['pred'].corr(df['label'], method='spearman')
     return ic, ric
 
-
+# 采样器
 class DailyBatchSamplerRandom(Sampler):
     def __init__(self, data_source, shuffle=False):
         self.data_source = data_source
@@ -57,6 +58,7 @@ class SequenceModel():
         self.save_prefix = save_prefix
 
 
+    # 初始化模型
     def init_model(self):
         if self.model is None:
             raise ValueError("model has not been initialized")
@@ -64,11 +66,13 @@ class SequenceModel():
         self.train_optimizer = optim.Adam(self.model.parameters(), self.lr)
         self.model.to(self.device)
 
+    # 损失函数
     def loss_fn(self, pred, label):
         mask = ~torch.isnan(label)
         loss = (pred[mask]-label[mask])**2
         return torch.mean(loss)
 
+    # 训练一个epoch
     def train_epoch(self, data_loader):
         self.model.train()
         losses = []
@@ -95,6 +99,7 @@ class SequenceModel():
 
         return float(np.mean(losses))
 
+    # 测试一个epoch
     def test_epoch(self, data_loader):
         self.model.eval()
         losses = []
@@ -109,15 +114,18 @@ class SequenceModel():
 
         return float(np.mean(losses))
 
+    # 初始化数据加载器
     def _init_data_loader(self, data, shuffle=True, drop_last=True):
         sampler = DailyBatchSamplerRandom(data, shuffle)
         data_loader = DataLoader(data, sampler=sampler, drop_last=drop_last)
         return data_loader
 
+    # 加载模型参数
     def load_param(self, param_path):
         self.model.load_state_dict(torch.load(param_path, map_location=self.device))
         self.fitted = True
-
+ 
+    # 训练模型
     def fit(self, dl_train, dl_valid):
         train_loader = self._init_data_loader(dl_train, shuffle=True, drop_last=True)
         valid_loader = self._init_data_loader(dl_valid, shuffle=False, drop_last=True)
@@ -164,7 +172,7 @@ class SequenceModel():
             'IC': np.mean(ic),
             'ICIR': np.mean(ic)/np.std(ic),
             'RIC': np.mean(ric),
-            'RICIR': np.mean(ic)/np.std(ric)
+            'RICIR': np.mean(ric)/np.std(ric)
         }
 
         return predictions, metrics

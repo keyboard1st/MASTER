@@ -196,6 +196,7 @@ class MASTER(nn.Module):
     def forward(self, x):
         src = x[:, :, :self.gate_input_start_index] # N, T, D
         gate_input = x[:, -1, self.gate_input_start_index:self.gate_input_end_index]
+        # Market-Guided Gating
         src = src * torch.unsqueeze(self.feature_gate(gate_input), dim=1)
 
         output = self.layers(src).squeeze(-1)

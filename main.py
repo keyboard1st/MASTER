@@ -1,7 +1,7 @@
 from master import MASTERModel
 import pickle
 
-universe = 'csi800' # or 'csi800'
+universe = 'csi300' # or 'csi800'
 
 # Please install qlib first before load the data.
 with open(f'data/{universe}/{universe}_dl_train.pkl', 'rb') as f:
@@ -47,11 +47,11 @@ predictions, metrics = model.predict(dl_test)
 print(metrics)
 
 # Load and Test
-#param_path = f'model/{universe}master_0.pkl.'
-#print(f'Model Loaded from {param_path}')
-#model.load_param(param_path)
-#predictions, metrics = model.predict(dl_test)
-#print(metrics)
+# param_path = f'model/{universe}master_0.pkl.'
+# print(f'Model Loaded from {param_path}')
+# model.load_param(param_path)
+# predictions, metrics = model.predict(dl_test)
+# print(metrics)
 
 
 
